@@ -18,6 +18,8 @@ const App: React.FC = () => {
   const [payouts, setPayouts] = useState<Payouts>(DEFAULT_PAYOUTS);
   const [results, setResults] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [cardHistory, setCardHistory] = useState<string[]>([]);
+
 
   useEffect(() => {
     const runCalc = async () => {
@@ -33,11 +35,22 @@ const App: React.FC = () => {
   }, [counts, payouts, rolling]);
 
   const updateCount = (rank: number, delta: number) => {
-    setCounts(prev => ({
-      ...prev,
-      [rank]: Math.max(0, prev[rank] + delta)
-    }));
+    setCounts(prev => {
+      const current = prev[rank];
+      const next = Math.max(0, current + delta);
+
+      // Only add to history if we actually removed a card (delta -1) and count was > 0
+      if (delta < 0 && current > 0) {
+        setCardHistory(h => [RANK_LABELS[rank], ...h].slice(0, 100)); // Keep last 100
+      }
+
+      return {
+        ...prev,
+        [rank]: next
+      };
+    });
   };
+
 
   const handlePayoutChange = (key: string, value: string, bonusKey?: number) => {
     const num = parseFloat(value) || 0;
@@ -63,7 +76,9 @@ const App: React.FC = () => {
       initial[r] = INITIAL_DECK_COUNT;
     });
     setCounts(initial);
+    setCardHistory([]);
   };
+
 
   const calculateKellyBet = (item: EVResult) => {
     if (item.ev <= 0 || item.payout <= 0) return 0;
@@ -121,7 +136,7 @@ const App: React.FC = () => {
             </svg>
             Card Inventory
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-2 gap-4 mb-6">
             {TOTAL_RANKS.map(rank => (
               <div key={rank} className="bg-slate-900 p-3 rounded-lg border border-slate-700 flex flex-col gap-2">
                 <div className="flex justify-between items-center">
@@ -143,6 +158,39 @@ const App: React.FC = () => {
               </div>
             ))}
           </div>
+
+          <div className="border-t border-slate-700 pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <svg className="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Card History
+              </h3>
+              <button
+                onClick={() => setCardHistory([])}
+                className="text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-300 uppercase transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+            <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50 min-h-[120px] max-h-[300px] overflow-y-auto custom-scrollbar">
+              {cardHistory.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-slate-600 text-xs italic">
+                  No cards clicked yet...
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {cardHistory.map((card, i) => (
+                    <span key={i} className={`px-3 py-1 rounded bg-slate-800 border border-slate-700 text-sm font-bold mono ${card === '0' || card === '10' || card === 'J' || card === 'Q' || card === 'K' ? 'text-purple-400' : 'text-slate-300'} animate-in fade-in zoom-in duration-300`}>
+                      {card}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
 
         <div className="lg:col-span-4 flex flex-col gap-6">
