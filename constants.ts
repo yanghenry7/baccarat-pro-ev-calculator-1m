@@ -5,7 +5,7 @@ export const INITIAL_DECK_COUNT = 32; // 8 decks * 4 suits = 32 of each rank
 export const TOTAL_RANKS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 export const DEFAULT_PAYOUTS: Payouts = {
-  banker: 0.95, // 1:0.95 (Commission)
+  banker: 1.0, // Default to 1:1 for No Commission
   player: 1.0,  // 1:1
   tie: 8.0,     // 1:8
   playerPair: 11.0,
@@ -26,7 +26,8 @@ export const DEFAULT_PAYOUTS: Payouts = {
   smallTiger: 22,
   bigTiger: 50,
   tigerTie: 35,
-  tigerPair: { same: 100, dual: 20, single: 4 }
+  tigerPair: { same: 100, dual: 20, single: 4 },
+  bankerMode: 'no-commission'
 };
 
 export const RANK_LABELS: Record<number, string> = {

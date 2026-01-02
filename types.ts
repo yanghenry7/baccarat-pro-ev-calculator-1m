@@ -17,6 +17,7 @@ export interface Payouts {
   bigTiger: number;
   tigerTie: number;
   tigerPair: { same: number; dual: number; single: number };
+  bankerMode: 'commission' | 'no-commission';
 }
 
 export interface EVResult {

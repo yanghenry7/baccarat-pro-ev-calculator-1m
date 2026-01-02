@@ -14,7 +14,7 @@ const App: React.FC = () => {
   });
 
   const [bankroll, setBankroll] = useState<number>(1000000);
-  const [rolling, setRolling] = useState<number>(1.4);
+  const [rolling, setRolling] = useState<number>(1.5);
   const [payouts, setPayouts] = useState<Payouts>(DEFAULT_PAYOUTS);
   const [results, setResults] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -35,20 +35,27 @@ const App: React.FC = () => {
   }, [counts, payouts, rolling]);
 
   const updateCount = (rank: number, delta: number) => {
-    setCounts(prev => {
-      const current = prev[rank];
-      const next = Math.max(0, current + delta);
+    const current = counts[rank];
+    if (delta < 0 && current <= 0) return;
 
-      // Only add to history if we actually removed a card (delta -1) and count was > 0
-      if (delta < 0 && current > 0) {
-        setCardHistory(h => [RANK_LABELS[rank], ...h].slice(0, 100)); // Keep last 100
-      }
+    setCounts(prev => ({
+      ...prev,
+      [rank]: Math.max(0, prev[rank] + delta)
+    }));
 
-      return {
-        ...prev,
-        [rank]: next
-      };
-    });
+    if (delta < 0) {
+      setCardHistory(h => [RANK_LABELS[rank], ...h].slice(0, 100));
+    } else if (delta > 0) {
+      setCardHistory(h => {
+        const index = h.indexOf(RANK_LABELS[rank]);
+        if (index !== -1) {
+          const newH = [...h];
+          newH.splice(index, 1);
+          return newH;
+        }
+        return h;
+      });
+    }
   };
 
 
@@ -273,6 +280,29 @@ const App: React.FC = () => {
                   className="w-full bg-slate-800 border border-slate-700 rounded pr-10 pl-3 py-3 text-xl font-bold text-blue-400 mono focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                 />
               </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              莊規則 (Banker Mode)
+            </h2>
+            <div className="bg-slate-900 p-2 rounded-lg border border-slate-700 flex gap-2">
+              <button
+                onClick={() => setPayouts(prev => ({ ...prev, bankerMode: 'commission', banker: 0.95 }))}
+                className={`flex-1 py-2 rounded text-sm font-bold transition-all ${payouts.bankerMode === 'commission' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+              >
+                1:0.95 抽水
+              </button>
+              <button
+                onClick={() => setPayouts(prev => ({ ...prev, bankerMode: 'no-commission', banker: 1.0 }))}
+                className={`flex-1 py-2 rounded text-sm font-bold transition-all ${payouts.bankerMode === 'no-commission' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/40' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+              >
+                1:1 免傭 (6點半)
+              </button>
             </div>
           </div>
 

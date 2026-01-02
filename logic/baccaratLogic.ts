@@ -149,7 +149,17 @@ export async function calculateEV(counts: DeckCounts, payouts: Payouts, rolling:
 
   // Banker/Player EV (Ties are Push)
   const evP = (pWinProb * payouts.player) - bWinProb + rollingBonus;
-  const evB = (bWinProb * payouts.banker) - pWinProb + rollingBonus;
+
+  let evB: number;
+  if (payouts.bankerMode === 'no-commission') {
+    // No Commission: Win with 6 pays 0.5, others pay 1.0. Loss pays -1.
+    const bWinProb6 = tiger6_2_Prob + tiger6_3_Prob;
+    const bWinProbNon6 = bWinProb - bWinProb6;
+    evB = (bWinProbNon6 * 1.0) + (bWinProb6 * 0.5) - pWinProb + rollingBonus;
+  } else {
+    // Standard Commission: Win pays 0.95 (or whatever payouts.banker is set to). Loss pays -1.
+    evB = (bWinProb * payouts.banker) - pWinProb + rollingBonus;
+  }
 
   // Tie/Pairs EV
   const evT = (tieProb * (payouts.tie + 1)) - 1 + rollingBonus;
