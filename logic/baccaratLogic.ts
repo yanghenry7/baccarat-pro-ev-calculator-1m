@@ -196,7 +196,7 @@ export async function calculateEV(counts: DeckCounts, payouts: Payouts, rolling:
     playerPair: { label: '閒對', probability: pPairProb, payout: payouts.playerPair, ev: evPPair },
     bankerPair: { label: '莊對', probability: bPairProb, payout: payouts.bankerPair, ev: evBPair },
     tieBonuses,
-    tiger: { label: 'Tiger', probability: tiger6_2_Prob + tiger6_3_Prob, payout: 0, ev: evTigerFixed },
+    tiger: { label: 'Tiger', probability: tiger6_2_Prob + tiger6_3_Prob, payout: 20, ev: evTigerFixed },
     smallTiger: { label: 'Small Tiger', probability: tiger6_2_Prob, payout: payouts.smallTiger, ev: evSmallTiger },
     bigTiger: { label: 'Big Tiger', probability: tiger6_3_Prob, payout: payouts.bigTiger, ev: evBigTiger },
     tigerTie: { label: 'Tiger Tie', probability: tigerTie6Prob, payout: payouts.tigerTie, ev: evTigerTie },
